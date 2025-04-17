@@ -49,13 +49,62 @@
             <!-- Input Form -->
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                 <div class="space-y-6">
+                    <!-- Nome do Funcionário -->
+                    <div class="mb-6">
+                        <label for="employeeName" class="block text-sm font-medium text-gray-700 mb-2">
+                            Nome do Funcionário
+                        </label>
+                        <input type="text" 
+                               id="employeeName" 
+                               list="employeeList"
+                               placeholder="Digite o nome do funcionário"
+                               class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md focus:ring-blue-500 focus:border-blue-500">
+                        <datalist id="employeeList">
+                            <option value="Alex">
+                            <option value="Kauan">
+                            <option value="Rian">
+                            <option value="Rick">
+                            <option value="Willian">
+                        </datalist>
+                    </div>
+
+                    <!-- Cargo -->
+                    <div class="mb-6">
+                        <label for="position" class="block text-sm font-medium text-gray-700 mb-2">
+                            Cargo
+                        </label>
+                        <input type="text" 
+                               id="position" 
+                               list="positionList"
+                               placeholder="Digite o cargo"
+                               class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md focus:ring-blue-500 focus:border-blue-500">
+                        <datalist id="positionList">
+                            <option value="TEC. CAMPO">
+                            <option value="SUPORTE">
+                            <option value="FINANCEIRO">
+                            <option value="COMERCIAL">
+                        </datalist>
+                    </div>
+
+                    <!-- Dias de Falta -->
+                    <div class="mb-6">
+                        <label for="absenceDays" class="block text-sm font-medium text-gray-700 mb-2">
+                            Dias de Falta
+                        </label>
+                        <input type="number" 
+                               id="absenceDays" 
+                               min="0"
+                               value="0"
+                               class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
                     <!-- Mês de Início -->
                     <div class="mb-6">
                         <label for="startMonth" class="block text-sm font-medium text-gray-700 mb-2">
                             Mês de Início do Cálculo
                         </label>
                         <select id="startMonth" 
-                                onchange="updateMonth(this)"
+                                onchange="updatePeriod(this.value)"
                                 class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md focus:ring-blue-500 focus:border-blue-500">
                             <option value="">Selecione o mês</option>
                             <option value="1">Janeiro (20/01 até 20/02)</option>
@@ -121,10 +170,24 @@
             <!-- Results Section -->
             <div id="resultContainer" class="bg-white rounded-lg shadow-md p-6 mt-6" style="display: none;">
                 <h2 class="text-lg font-semibold text-gray-900 mb-4">Resultado do Cálculo</h2>
-                <div class="mb-4 p-4 bg-green-50 rounded-md">
-                    <p class="text-lg font-semibold text-green-900">
-                        Total a receber: <span id="totalAmount" class="text-2xl"></span>
-                    </p>
+                <div class="space-y-4">
+                    <!-- Informações do Funcionário -->
+                    <div class="p-4 bg-blue-50 rounded-md">
+                        <h3 class="font-medium text-blue-900 mb-2">Informações do Funcionário</h3>
+                        <div class="space-y-2">
+                            <p class="text-blue-800">Nome: <span id="resultEmployeeName" class="font-medium"></span></p>
+                            <p class="text-blue-800">Cargo: <span id="resultPosition" class="font-medium"></span></p>
+                            <p class="text-blue-800">Dias Trabalhados: <span id="workDaysCount" class="font-medium"></span></p>
+                            <p class="text-blue-800">Dias de Falta: <span id="absenceDaysCount" class="font-medium"></span></p>
+                        </div>
+                    </div>
+
+                    <!-- Valor Total -->
+                    <div class="p-4 bg-green-50 rounded-md">
+                        <p class="text-lg font-semibold text-green-900">
+                            Total a receber: <span id="totalAmount" class="text-2xl"></span>
+                        </p>
+                    </div>
                 </div>
                 <div>
                     <h3 class="font-medium text-gray-900 mb-2">Dias extras selecionados:</h3>
@@ -137,7 +200,20 @@
     </div>
 
     <!-- JavaScript -->
-    <script src="js/holidays.js"></script>
-    <script src="js/calculations.js"></script>
+        <script>
+            window.addEventListener('load', function() {
+                console.log('Window loaded');
+                alert('Window loaded');
+            });
+        </script>
+        <script src="js/holidays.js"></script>
+        <script src="js/calculations.js"></script>
+        <script>
+            // Verify scripts loaded
+            if (typeof isHoliday === 'function') {
+                console.log('holidays.js loaded successfully');
+                alert('holidays.js loaded');
+            }
+        </script>
 </body>
 </html>
