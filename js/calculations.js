@@ -105,21 +105,20 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('errorMessage').classList.add('hidden');
 
         const period = calculatePeriod(selectedMonth);
-        const workDays = calculateWorkDays(period);
+        const regularWorkDays = calculateWorkDays(period);
         const selectedExtraDays = getSelectedExtraDays();
         
-        // Calculate actual working days after subtracting absences
-        const actualWorkDays = Math.max(0, workDays - absenceDays);
-        const totalDays = actualWorkDays + selectedExtraDays.length;
-        const total = totalDays * dailyRate;
+        // Calculate actual working days including extra days and subtracting absences
+        const totalWorkDays = regularWorkDays + selectedExtraDays.length - absenceDays;
+        const total = totalWorkDays * dailyRate;
 
         document.getElementById('resultContainer').style.display = 'block';
         displayResults(total, selectedExtraDays, {
             employeeName,
             position,
-            workDays: actualWorkDays, // Display actual working days after absences
+            workDays: totalWorkDays, // Now includes both regular and extra working days, minus absences
             absenceDays,
-            totalDays
+            totalDays: totalWorkDays
         });
         document.getElementById('resultContainer').scrollIntoView({ behavior: 'smooth' });
     });
