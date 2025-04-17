@@ -1,69 +1,25 @@
-// Make handleMonthChange globally accessible
-window.handleMonthChange = function(value) {
-    console.log('Month changed:', value);
+// Make updatePeriod function globally accessible
+window.updatePeriod = function(value) {
     const selectedMonth = parseInt(value);
     const periodInfo = document.getElementById('periodInfo');
     const extraDaysContainer = document.getElementById('extraDaysContainer');
     const monthError = document.getElementById('monthError');
     
     if (!selectedMonth) {
-        console.log('No month selected');
         monthError.classList.remove('hidden');
         extraDaysContainer.innerHTML = '';
         periodInfo.textContent = '';
         return;
     }
 
-    console.log('Valid month selected:', selectedMonth);
     monthError.classList.add('hidden');
     const period = calculatePeriod(selectedMonth);
     displayPeriod(period);
     generateExtraDaysList(period);
 };
 
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded');
-    
-    // Get DOM elements
-    const startMonthSelect = document.getElementById('startMonth');
-    const dailyRateInput = document.getElementById('dailyRate');
-    const calculateButton = document.getElementById('calculateButton');
-    const resultContainer = document.getElementById('resultContainer');
-    const totalAmount = document.getElementById('totalAmount');
-    const selectedDaysList = document.getElementById('selectedDaysList');
-    const errorMessage = document.getElementById('errorMessage');
-
-    // Add calculate button event listener
-    calculateButton.onclick = function() {
-        console.log('Calculate button clicked');
-        const selectedMonth = parseInt(startMonthSelect.value);
-        const dailyRate = parseFloat(dailyRateInput.value);
-        
-        if (!selectedMonth || !dailyRate || dailyRate <= 0) {
-            if (!selectedMonth) document.getElementById('monthError').classList.remove('hidden');
-            if (!dailyRate || dailyRate <= 0) errorMessage.classList.remove('hidden');
-            return;
-        }
-
-        document.getElementById('monthError').classList.add('hidden');
-        errorMessage.classList.add('hidden');
-
-        const period = calculatePeriod(selectedMonth);
-        const workDays = calculateWorkDays(period);
-        const selectedExtraDays = getSelectedExtraDays();
-        const totalDays = workDays + selectedExtraDays.length;
-        const total = totalDays * dailyRate;
-
-        console.log('Calculation results:', { workDays, extraDays: selectedExtraDays.length, totalDays, total });
-
-        resultContainer.style.display = 'block';
-        displayResults(total, selectedExtraDays);
-        resultContainer.scrollIntoView({ behavior: 'smooth' });
-    };
-});
-
+// Calculate period based on selected month
 function calculatePeriod(month) {
-    console.log('Calculating period for month:', month);
     const currentYear = new Date().getFullYear();
     const startDate = new Date(currentYear, month - 1, 20);
     const endDate = new Date(currentYear, month, 20);
@@ -79,18 +35,17 @@ function calculatePeriod(month) {
         endDate.setDate(daysInEndMonth);
     }
 
-    console.log('Period calculated:', { startDate, endDate });
     return { startDate, endDate };
 }
 
+// Display the selected period
 function displayPeriod({ startDate, endDate }) {
     const formattedText = `${formatDate(startDate)} até ${formatDate(endDate)}`;
-    console.log('Displaying period:', formattedText);
     document.getElementById('periodInfo').textContent = formattedText;
 }
 
+// Generate list of extra days (weekends and holidays)
 function generateExtraDaysList({ startDate, endDate }) {
-    console.log('Generating extra days list');
     const extraDaysContainer = document.getElementById('extraDaysContainer');
     extraDaysContainer.innerHTML = '';
     const dates = [];
@@ -102,8 +57,6 @@ function generateExtraDaysList({ startDate, endDate }) {
         }
         currentDate.setDate(currentDate.getDate() + 1);
     }
-
-    console.log('Found extra days:', dates.length);
 
     if (dates.length === 0) {
         extraDaysContainer.innerHTML = '<p class="text-gray-500">Nenhum dia extra encontrado no período</p>';
@@ -130,6 +83,72 @@ function generateExtraDaysList({ startDate, endDate }) {
     });
 }
 
+// Calculate button click handler
+document.addEventListener('DOMContentLoaded', function() {
+    const calculateButton = document.getElementById('calculateButton');
+    calculateButton.addEventListener('click', function() {
+        // Get all form values
+        const selectedMonth = parseInt(document.getElementById('startMonth').value);
+        const dailyRate = parseFloat(document.getElementById('dailyRate').value);
+        const employeeName = document.getElementById('employeeName').value;
+        const position = document.getElementById('position').value;
+        const absenceDays = parseInt(document.getElementById('absenceDays').value) || 0;
+        
+        // Validate required fields
+        if (!selectedMonth || !dailyRate || dailyRate <= 0 || !employeeName || !position) {
+            if (!selectedMonth) document.getElementById('monthError').classList.remove('hidden');
+            if (!dailyRate || dailyRate <= 0) document.getElementById('errorMessage').classList.remove('hidden');
+            return;
+        }
+
+        document.getElementById('monthError').classList.add('hidden');
+        document.getElementById('errorMessage').classList.add('hidden');
+
+        const period = calculatePeriod(selectedMonth);
+        const workDays = calculateWorkDays(period);
+        const selectedExtraDays = getSelectedExtraDays();
+        
+        // Calculate actual working days after subtracting absences
+        const actualWorkDays = Math.max(0, workDays - absenceDays);
+        const totalDays = actualWorkDays + selectedExtraDays.length;
+        const total = totalDays * dailyRate;
+
+        document.getElementById('resultContainer').style.display = 'block';
+        displayResults(total, selectedExtraDays, {
+            employeeName,
+            position,
+            workDays: actualWorkDays, // Display actual working days after absences
+            absenceDays,
+            totalDays
+        });
+        document.getElementById('resultContainer').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Add autocomplete functionality for employee name and position
+    setupAutocomplete('employeeName', ['Alex', 'Kauan', 'Rian', 'Rick', 'Willian']);
+    setupAutocomplete('position', ['TEC. CAMPO', 'SUPORTE', 'FINANCEIRO', 'COMERCIAL']);
+});
+
+// Setup autocomplete functionality
+function setupAutocomplete(inputId, options) {
+    const input = document.getElementById(inputId);
+    const datalist = document.getElementById(inputId + 'List');
+
+    input.addEventListener('input', function() {
+        const value = this.value.toLowerCase();
+        datalist.innerHTML = '';
+        
+        options.forEach(option => {
+            if (option.toLowerCase().startsWith(value)) {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                datalist.appendChild(optionElement);
+            }
+        });
+    });
+}
+
+// Calculate work days in a period
 function calculateWorkDays({ startDate, endDate }) {
     let workDays = 0;
     const currentDate = new Date(startDate);
@@ -144,6 +163,7 @@ function calculateWorkDays({ startDate, endDate }) {
     return workDays;
 }
 
+// Get selected extra days
 function getSelectedExtraDays() {
     const selectedDays = [];
     const checkboxes = document.getElementById('extraDaysContainer').querySelectorAll('input[type="checkbox"]');
@@ -167,16 +187,24 @@ function getSelectedExtraDays() {
     return selectedDays;
 }
 
-function displayResults(total, selectedDays) {
-    const totalAmount = document.getElementById('totalAmount');
-    const selectedDaysList = document.getElementById('selectedDaysList');
+// Display calculation results
+function displayResults(total, selectedDays, employeeInfo) {
+    // Update employee information
+    document.getElementById('resultEmployeeName').textContent = employeeInfo.employeeName;
+    document.getElementById('resultPosition').textContent = employeeInfo.position;
+    document.getElementById('workDaysCount').textContent = employeeInfo.workDays;
+    document.getElementById('absenceDaysCount').textContent = employeeInfo.absenceDays;
 
-    totalAmount.textContent = total.toLocaleString('pt-BR', {
+    // Update total amount
+    document.getElementById('totalAmount').textContent = total.toLocaleString('pt-BR', {
         style: 'currency',
         currency: 'BRL'
     });
 
+    // Update selected days list
+    const selectedDaysList = document.getElementById('selectedDaysList');
     selectedDaysList.innerHTML = '';
+    
     if (selectedDays.length === 0) {
         selectedDaysList.innerHTML = '<li class="text-gray-500">Nenhum dia extra selecionado</li>';
     } else {
